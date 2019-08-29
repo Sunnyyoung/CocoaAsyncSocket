@@ -1430,10 +1430,20 @@ enum GCDAsyncSocketConfig
 
 - (BOOL)acceptOnPort:(uint16_t)port error:(NSError **)errPtr
 {
-	return [self acceptOnInterface:nil port:port error:errPtr];
+	return [self acceptOnInterface:nil port:port options:@[] error:errPtr];
+}
+
+- (BOOL)acceptOnPort:(uint16_t)port options:(NSArray<NSNumber *> *)options error:(NSError **)errPtr
+{
+    return [self acceptOnInterface:nil port:port options:options error:errPtr];
 }
 
 - (BOOL)acceptOnInterface:(NSString *)inInterface port:(uint16_t)port error:(NSError **)errPtr
+{
+    return [self acceptOnInterface:inInterface port:port options:@[] error:errPtr];
+}
+
+- (BOOL)acceptOnInterface:(NSString *)inInterface port:(uint16_t)port options:(NSArray<NSNumber *> *)options error:(NSError **)errPtr
 {
 	LogTrace();
 	
@@ -1484,6 +1494,19 @@ enum GCDAsyncSocketConfig
 			close(socketFD);
 			return SOCKET_NULL;
 		}
+        
+        for (NSNumber *option in options) {
+            int flag = 1;
+            if (setsockopt(socketFD, SOL_SOCKET, option.intValue, &flag, sizeof(flag)) == -1)
+            {
+                NSString *reason = @"Error enabling custom option (setsockopt)";
+                err = [self errorWithErrno:errno reason:reason];
+                
+                LogVerbose(@"close(socketFD)");
+                close(socketFD);
+                return SOCKET_NULL;
+            }
+        }
 		
 		// Bind socket
 		

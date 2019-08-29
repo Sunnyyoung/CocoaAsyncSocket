@@ -160,6 +160,7 @@ typedef NS_ERROR_ENUM(GCDAsyncSocketErrorDomain, GCDAsyncSocketError) {
  * The socket will listen on all available interfaces (e.g. wifi, ethernet, etc)
 **/
 - (BOOL)acceptOnPort:(uint16_t)port error:(NSError **)errPtr;
+- (BOOL)acceptOnPort:(uint16_t)port options:(NSArray<NSNumber *> *)options error:(NSError **)errPtr;
 
 /**
  * This method is the same as acceptOnPort:error: with the
@@ -178,6 +179,7 @@ typedef NS_ERROR_ENUM(GCDAsyncSocketErrorDomain, GCDAsyncSocketError) {
  * To accept connections on any interface pass nil, or simply use the acceptOnPort:error: method.
 **/
 - (BOOL)acceptOnInterface:(nullable NSString *)interface port:(uint16_t)port error:(NSError **)errPtr;
+- (BOOL)acceptOnInterface:(nullable NSString *)interface port:(uint16_t)port options:(NSArray<NSNumber *> *)options error:(NSError **)errPtr;
 
 /**
  * Tells the socket to begin listening and accepting connections on the unix domain at the given url.

@@ -3643,6 +3643,70 @@ enum GCDAsyncUdpSocketConfig
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Dont Route
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (BOOL)enableDontRoute:(BOOL)flag error:(NSError **)errPtr
+{
+    __block BOOL result = NO;
+    __block NSError *err = nil;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        if (![self preOp:&err])
+        {
+            return_from_block;
+        }
+        
+        if ((self->flags & kDidCreateSockets) == 0)
+        {
+            if (![self createSockets:&err])
+            {
+                return_from_block;
+            }
+        }
+        
+        int value = flag ? 1 : 0;
+        if (self->socket4FD != SOCKET_NULL)
+        {
+            int error = setsockopt(self->socket4FD, SOL_SOCKET, SO_DONTROUTE, (const void *)&value, sizeof(value));
+            
+            if (error)
+            {
+                err = [self errnoErrorWithReason:@"Error in setsockopt() function"];
+                
+                return_from_block;
+            }
+            result = YES;
+        }
+        
+        if (self->socket6FD != SOCKET_NULL)
+        {
+            int error = setsockopt(self->socket6FD, SOL_SOCKET, SO_DONTROUTE, (const void *)&value, sizeof(value));
+            
+            if (error)
+            {
+                err = [self errnoErrorWithReason:@"Error in setsockopt() function"];
+                
+                return_from_block;
+            }
+            result = YES;
+        }
+        
+    }};
+    
+    if (dispatch_get_specific(IsOnSocketQueueOrTargetQueueKey))
+    block();
+    else
+    dispatch_sync(socketQueue, block);
+    
+    if (errPtr)
+    *errPtr = err;
+    
+    return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Sending
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

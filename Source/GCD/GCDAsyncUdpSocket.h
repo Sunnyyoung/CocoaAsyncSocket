@@ -514,6 +514,18 @@ typedef BOOL (^GCDAsyncUdpSocketSendFilterBlock)(NSData *data, NSData *address, 
 **/
 - (BOOL)enableBroadcast:(BOOL)flag error:(NSError **)errPtr;
 
+#pragma mark Dont Route
+
+/**
+ * By default is false
+ *
+ * Don't send via a gateway, send only to directly connected
+ * hosts.  The same effect can be achieved by setting the
+ * MSG_DONTROUTE flag on a socket send(2) operation.  Expects an
+ * integer boolean flag.
+**/
+- (BOOL)enableDontRoute:(BOOL)flag error:(NSError **)errPtr;
+
 #pragma mark Sending
 
 /**
